@@ -26,11 +26,21 @@ def listar_dispositivos():
 def agregar_dispositivo():
     data = request.get_json()
     conn = conectar_db()
-    conn.execute("INSERT INTO dispositivos (nombre, ip, usuario, password) VALUES (?, ?, ?, ?)",
-                 (data['nombre'], data['ip'], data['usuario'], data['password']))
+    conn.execute("""
+        INSERT INTO dispositivos (nombre, ip, usuario, password, tipo, puerto_ssh)
+        VALUES (?, ?, ?, ?, ?)
+    """, (
+        data['nombre'],
+        data['ip'],
+        data['usuario'],
+        data['password'],
+        data['tipo'],
+        data['puerto_ssh']
+    ))
     conn.commit()
     conn.close()
     return jsonify({"mensaje": "Dispositivo agregado"})
+
 
 @app.route("/eliminar", methods=["POST"])
 def eliminar_dispositivo():

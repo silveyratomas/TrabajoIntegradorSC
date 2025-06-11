@@ -18,11 +18,17 @@
       <label>IP:</label>
       <input type="text" id="ip" placeholder="Ej: 192.168.1.100">
 
+      <label>Tipo:</label>
+      <input type="text" id="tipo" placeholder="Ubikiti">
+
       <label>Usuario:</label>
       <input type="text" id="usuario" placeholder="Ej: admin">
 
       <label>Contraseña:</label>
       <input type="password" id="password" placeholder="******">
+
+      <label>Puerto SSH:</label>
+      <input type="number" id="puerto_ssh" placeholder="Ej: 22">
 
       <div class="botones">
         <button id="btn-agregar">Agregar</button>
@@ -40,3 +46,21 @@
         <tr>
           <th>ID</th>
           <th>Nombre</th>
+          <th>IP</th>
+          <th>Usuario</th>
+          <th>Tipo</th>
+          <th>Puerto SSH</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-dispositivos">
+        <!-- Se cargarán filas acá dinámicamente -->
+      </tbody>
+    </table>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+
