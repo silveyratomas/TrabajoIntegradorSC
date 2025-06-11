@@ -70,10 +70,18 @@ thead {
 
 th, td {
   padding: 10px;
-  border-bottom: 1px solid #ddd;
+  border: 1px solid #ccc;
   text-align: center;
 }
 
 tbody tr:hover {
   background-color: #f0f0f0;
+}
+
+#btn-backup {
+  background-color: #388e3c;
+}
+
+#btn-backup:hover {
+  background-color: #2e7d32;
 }

@@ -1,136 +1,132 @@
+// Lista simulada de dispositivos (por ahora en memoria)
+let dispositivos = [];
+let dispositivoSeleccionado = null;
+
+// Referencias a los campos
 const nombreInput = document.getElementById('nombre');
 const ipInput = document.getElementById('ip');
 const usuarioInput = document.getElementById('usuario');
 const passwordInput = document.getElementById('password');
+const tipoInput = document.getElementById('tipo');
+const puertoInput = document.getElementById('puerto_ssh');
 const tabla = document.getElementById('tabla-dispositivos');
 
-let dispositivoSeleccionado = null;
 
+// Botones
 document.getElementById('btn-agregar').addEventListener('click', agregarDispositivo);
 document.getElementById('btn-eliminar').addEventListener('click', eliminarDispositivo);
 document.getElementById('btn-cargar').addEventListener('click', cargarDispositivo);
 document.getElementById('btn-modificar').addEventListener('click', modificarDispositivo);
-document.getElementById('btn-probar').addEventListener('click', probarSSH);
-document.getElementById('btn-backup').addEventListener('click', hacerBackup);
+document.getElementById('btn-probar').addEventListener('click', () => {
+  alert('Simulación: probando conexión SSH...');
+});
+
+function agregarDispositivo() {
+  const nuevo = {
+    id: Date.now(),
+    nombre: nombreInput.value,
+    ip: ipInput.value,
+    usuario: usuarioInput.value,
+    password: passwordInput.value,
+    tipo: tipoInput.value, // ← este es el nuevo campo
+    puerto_ssh: parseInt(puertoInput.value) || 22  // ← por si no lo completan
+
+  };
+
+  if (nuevo.nombre && nuevo.ip && nuevo.usuario && nuevo.password) {
+    dispositivos.push(nuevo);
+    limpiarCampos();
+    renderizarTabla();
+  } else {
+    alert('Todos los campos son obligatorios');
+  }
+}
+
+
+function cargarDispositivo() {
+  if (!dispositivoSeleccionado) {
+    alert('Seleccioná una fila primero');
+    return;
+  }
+  const dispositivo = dispositivos.find(d => d.id === dispositivoSeleccionado);
+  if (dispositivo) {
+    nombreInput.value = dispositivo.nombre;
+    ipInput.value = dispositivo.ip;
+    usuarioInput.value = dispositivo.usuario;
+    tipoInput.value = dispositivo.tipo || '';  // ← Esto es lo nuevo
+    puertoInput.value = dispositivo.puerto_ssh || 22;
+    // Nota: la contraseña no la mostramos por seguridad
+  }
+}
+
+
+// Modifica el dispositivo actualmente cargado
+function modificarDispositivo() {
+  if (!dispositivoSeleccionado) {
+    alert('Seleccioná una fila primero');
+    return;
+  }
+  const index = dispositivos.findIndex(d => d.id === dispositivoSeleccionado);
+  if (index !== -1) {
+    dispositivos[index].nombre = nombreInput.value;
+    dispositivos[index].ip = ipInput.value;
+    dispositivos[index].usuario = usuarioInput.value;
+    renderizarTabla();
+    limpiarCampos();
+  }
+}
+
+// Elimina el dispositivo seleccionado
+function eliminarDispositivo() {
+  if (!dispositivoSeleccionado) {
+    alert('Seleccioná una fila primero');
+    return;
+  }
+  dispositivos = dispositivos.filter(d => d.id !== dispositivoSeleccionado);
+  renderizarTabla();
+  limpiarCampos();
+}
+
+// Muestra todos los dispositivos en la tabla
+function renderizarTabla() {
+  tabla.innerHTML = '';
+  dispositivos.forEach(d => {
+    const fila = document.createElement('tr');
+    fila.innerHTML = `
+      <td>${d.id}</td>
+      <td>${d.nombre}</td>
+      <td>${d.ip}</td>
+      <td>${d.usuario}</td>
+      <td>${d.tipo || ''}</td>
+      <td>${d.puerto_ssh || ''}</td>
+    `;
+    fila.addEventListener('click', () => {
+      dispositivoSeleccionado = d.id;
+      document.querySelectorAll('tr').forEach(f => f.classList.remove('seleccionado'));
+      fila.classList.add('seleccionado');
+    });
+    tabla.appendChild(fila);
+  });
+}
 
 function limpiarCampos() {
   nombreInput.value = '';
   ipInput.value = '';
   usuarioInput.value = '';
   passwordInput.value = '';
+  tipoInput.value = '';
+  puertoInput.value = '';
   dispositivoSeleccionado = null;
 }
 
-async function renderizarTabla() {
-  const res = await fetch("/dispositivos");
-  const dispositivos = await res.json();
-  tabla.innerHTML = "";
-  dispositivos.forEach(d => {
-    const fila = document.createElement("tr");
-    fila.innerHTML = `<td>${d.id}</td><td>${d.nombre}</td><td>${d.ip}</td><td>${d.usuario}</td>`;
-    fila.addEventListener("click", () => {
-      dispositivoSeleccionado = d;
-      nombreInput.value = d.nombre;
-      ipInput.value = d.ip;
-      usuarioInput.value = d.usuario;
-    });
-    tabla.appendChild(fila);
-  });
-}
-
-async function agregarDispositivo() {
-  const data = {
-    nombre: nombreInput.value,
-    ip: ipInput.value,
-    usuario: usuarioInput.value,
-    password: passwordInput.value
-  };
-  const res = await fetch("/agregar", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  });
-  if (res.ok) {
-    alert("Dispositivo agregado");
-    limpiarCampos();
-    renderizarTabla();
-  } else {
-    alert("Error al agregar");
-  }
-}
-
-async function eliminarDispositivo() {
+document.getElementById('btn-backup').addEventListener('click', () => {
   if (!dispositivoSeleccionado) {
-    alert("Seleccioná una fila primero");
+    alert('Seleccioná un dispositivo primero');
     return;
   }
-  const res = await fetch("/eliminar", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id: dispositivoSeleccionado.id })
-  });
-  if (res.ok) {
-    alert("Dispositivo eliminado");
-    limpiarCampos();
-    renderizarTabla();
-  } else {
-    alert("Error al eliminar");
+  const dispositivo = dispositivos.find(d => d.id === dispositivoSeleccionado);
+  if (dispositivo) {
+    alert(`Simulación: Iniciando backup para ${dispositivo.ip}`);
+    // Acá en el futuro se va a hacer la llamada real al backend
   }
-}
-
-function cargarDispositivo() {
-  if (!dispositivoSeleccionado) {
-    alert("Seleccioná una fila primero");
-    return;
-  }
-  nombreInput.value = dispositivoSeleccionado.nombre;
-  ipInput.value = dispositivoSeleccionado.ip;
-  usuarioInput.value = dispositivoSeleccionado.usuario;
-}
-
-function modificarDispositivo() {
-  alert("Función no implementada todavía");
-}
-
-async function probarSSH() {
-  const data = {
-    ip: ipInput.value,
-    usuario: usuarioInput.value,
-    password: passwordInput.value
-  };
-  const res = await fetch("/probar_ssh", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  });
-
-  const respuesta = await res.json();
-  if (res.ok) {
-    alert("Respuesta SSH:\n" + respuesta.salida);
-  } else {
-    alert("Error: " + respuesta.error);
-  }
-}
-
-async function hacerBackup() {
-  const data = {
-    ip: ipInput.value,
-    usuario: usuarioInput.value,
-    password: passwordInput.value
-  };
-
-  const res = await fetch("/backup", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  });
-
-  const respuesta = await res.json();
-  if (res.ok) {
-    alert("Backup ejecutado:\n" + respuesta.salida);
-  } else {
-    alert("Error:\n" + respuesta.error);
-  }
-}
-
-window.onload = renderizarTabla;
+});
