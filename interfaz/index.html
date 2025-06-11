@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gestión de Dispositivos de Red</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Gestión de Dispositivos de Red</h1>
+
+    <div class="formulario">
+      <label>Nombre:</label>
+      <input type="text" id="nombre" placeholder="Ej: Router Principal">
+
+      <label>IP:</label>
+      <input type="text" id="ip" placeholder="Ej: 192.168.1.100">
+
+      <label>Usuario:</label>
+      <input type="text" id="usuario" placeholder="Ej: admin">
+
+      <label>Contraseña:</label>
+      <input type="password" id="password" placeholder="******">
+
+      <div class="botones">
+        <button id="btn-agregar">Agregar</button>
+        <button id="btn-modificar">Modificar</button>
+        <button id="btn-cargar">Cargar</button>
+        <button id="btn-eliminar">Eliminar</button>
+        <button id="btn-probar">Probar SSH</button>
+        <button id="btn-backup">Hacer Backup</button>
+      </div>
+    </div>
+
+    <h2>Dispositivos Registrados</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>IP</th>
+          <th>Usuario</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-dispositivos">
+        <!-- Se cargarán filas acá dinámicamente -->
+      </tbody>
+    </table>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
