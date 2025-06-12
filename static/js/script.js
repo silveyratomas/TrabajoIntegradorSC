@@ -18,8 +18,41 @@ document.getElementById('btn-eliminar').addEventListener('click', eliminarDispos
 document.getElementById('btn-cargar').addEventListener('click', cargarDispositivo);
 document.getElementById('btn-modificar').addEventListener('click', modificarDispositivo);
 document.getElementById('btn-probar').addEventListener('click', () => {
-  alert('Simulación: probando conexión SSH...');
+  if (!dispositivoSeleccionado) {
+    alert('Seleccioná un dispositivo primero');
+    return;
+  }
+
+  const dispositivo = dispositivos.find(d => d.id === dispositivoSeleccionado);
+  if (!dispositivo) {
+    alert('Dispositivo no encontrado');
+    return;
+  }
+
+  const data = {
+    ip: dispositivo.ip,
+    usuario: dispositivo.usuario,
+    password: dispositivo.password
+  };
+
+  fetch('/probar_ssh', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+  .then(res => res.json())
+  .then(respuesta => {
+    if (respuesta.salida) {
+      alert("✅ Conexión SSH exitosa:\n" + respuesta.salida);
+    } else {
+      alert("❌ Error:\n" + respuesta.error);
+    }
+  })
+  .catch(err => {
+    alert("❌ Error de red o del servidor:\n" + err);
+  });
 });
+
 
 function agregarDispositivo() {
   const nuevo = {
