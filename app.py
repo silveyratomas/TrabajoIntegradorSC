@@ -56,7 +56,7 @@ def probar_ssh():
     data = request.get_json()
     ssh = SSHService(data['ip'], data['usuario'], data['password'])
     if ssh.conectar():
-        salida, errores = ssh.ejecutar_comando("echo SSH OK")
+        salida, errores = ssh.ejecutar_comando("/ip address print")
         ssh.cerrar()
         return jsonify({"salida": salida, "errores": errores})
     else:
@@ -64,15 +64,38 @@ def probar_ssh():
 
 @app.route("/backup", methods=["POST"])
 def hacer_backup():
+    import os
+    from datetime import datetime
+
     data = request.get_json()
     ssh = SSHService(data['ip'], data['usuario'], data['password'])
+
     if ssh.conectar():
-        comando = "echo backup realizado correctamente"
-        salida, errores = ssh.ejecutar_comando(comando)
+        # 1. Generar nombre base del archivo SIN .backup
+        nombre_base = f"backup_{data['ip'].replace('.', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        nombre_remoto = f"{nombre_base}.backup"  # Mikrotik le agrega esto automáticamente
+        ruta_local = os.path.join("backups", nombre_remoto)
+
+        # 2. Crear el backup en el router
+        comando = f"/system backup save name={nombre_base}"
+        ssh.ejecutar_comando(comando)
+
+        # 3. Descargar el archivo
+        try:
+            ssh.descargar_archivo(nombre_remoto, ruta_local)
+        except Exception as e:
+            ssh.cerrar()
+            return jsonify({"error": f"Backup creado pero no se pudo descargar: {str(e)}"}), 500
+
         ssh.cerrar()
-        return jsonify({"salida": salida, "errores": errores})
+        return jsonify({"salida": f"Backup guardado localmente en {ruta_local}"})
+
     else:
         return jsonify({"error": "No se pudo conectar al dispositivo"}), 400
 
+
+
+
+    
 if __name__ == "__main__":
     app.run(debug=True)

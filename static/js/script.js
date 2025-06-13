@@ -17,6 +17,7 @@ document.getElementById('btn-agregar').addEventListener('click', agregarDisposit
 document.getElementById('btn-eliminar').addEventListener('click', eliminarDispositivo);
 document.getElementById('btn-cargar').addEventListener('click', cargarDispositivo);
 document.getElementById('btn-modificar').addEventListener('click', modificarDispositivo);
+document.getElementById('btn-backup').addEventListener('click', hacerBackup);
 document.getElementById('btn-probar').addEventListener('click', () => {
   if (!dispositivoSeleccionado) {
     alert('Seleccioná un dispositivo primero');
@@ -152,14 +153,59 @@ function limpiarCampos() {
   dispositivoSeleccionado = null;
 }
 
-document.getElementById('btn-backup').addEventListener('click', () => {
+document.getElementById('btn-probar').addEventListener('click', () => {
   if (!dispositivoSeleccionado) {
-    alert('Seleccioná un dispositivo primero');
+    alert("Seleccioná un dispositivo primero");
     return;
   }
+
   const dispositivo = dispositivos.find(d => d.id === dispositivoSeleccionado);
-  if (dispositivo) {
-    alert(`Simulación: Iniciando backup para ${dispositivo.ip}`);
-    // Acá en el futuro se va a hacer la llamada real al backend
-  }
+  fetch("/probar_ssh", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ip: dispositivo.ip,
+      usuario: dispositivo.usuario,
+      password: dispositivo.password
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.salida) {
+      alert("✅ Conexión exitosa:\n" + data.salida);
+    } else {
+      alert("❌ Error: " + (data.error || data.errores));
+    }
+  });
 });
+
+
+async function hacerBackup() {
+  if (!dispositivoSeleccionado) {
+    alert("Seleccioná un dispositivo primero");
+    return;
+  }
+
+  const dispositivo = dispositivos.find(d => d.id === dispositivoSeleccionado);
+  if (!dispositivo) return;
+
+  const res = await fetch("/backup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ip: dispositivo.ip,
+      usuario: dispositivo.usuario,
+      password: dispositivo.password
+    })
+  });
+
+  const respuesta = await res.json();
+
+  if (res.ok) {
+    alert("Backup realizado:\n" + respuesta.salida);
+  } else {
+    alert("Error:\n" + (respuesta.error || "Error desconocido"));
+  }
+}
+
+

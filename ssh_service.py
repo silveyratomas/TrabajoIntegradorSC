@@ -1,6 +1,14 @@
 import paramiko
 
 class SSHService:
+    def descargar_archivo(self, remoto, local):
+        try:
+            ftp = self.cliente.open_sftp()
+            ftp.get(remoto, local)
+            ftp.close()
+        except Exception as e:
+            print(f"Error al descargar el archivo: {e}")
+
     def __init__(self, ip, usuario, password):
         self.ip = ip.strip()
         self.usuario = usuario.strip()
@@ -31,3 +39,5 @@ class SSHService:
     def cerrar(self):
         if self.cliente:
             self.cliente.close()
+
+    
